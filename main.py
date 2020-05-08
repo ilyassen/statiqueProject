@@ -6,6 +6,8 @@ import re
 import json
 import os
 
+import csv
+
 import xlsxwriter
 
 from openpyxl import Workbook
@@ -15,43 +17,55 @@ import openpyxl
 
 import shutil
 
-ApplicationName = "moodle"
+ApplicationName = "phpunit"
 
 pathDirectory = "D:/Projects/AnalysteProject/repositories/" + ApplicationName
 
 os.chdir("D:/Projects/AnalysteProject/repositories")
 
 
-Projet_GIT_URL = "https://github.com/moodle/moodle"
+Projet_GIT_URL = "https://github.com/laravel/laravel"
 
 # subprocess.check_output("git clone " + Projet_GIT_URL , shell=True)
 
 os.chdir("D:/Projects/AnalysteProject")
 
-f = open('D:/Projects/AnalysteProject/config.json')
+f = open('D:/Projects/AnalysteProject/config_' + ApplicationName +'.json')
 json_file = json.load(f)
 print(json_file)
 if not json_file['name']:
-    workbook = xlsxwriter.Workbook("D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".xlsx")
-    worksheet = workbook.add_worksheet("Analyse")
-    wsn = worksheet.name
-    print(worksheet.name)
+    # workbook = xlsxwriter.Workbook("D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".xlsx")
+    # worksheet = workbook.add_worksheet("Analyse")
+    # wsn = worksheet.name
+    # print(worksheet.name)
     row = 2
     Files = []
     start_commit = json_file['first_commit']
-    worksheet.write('A1', 'Commit id')
-    worksheet.write('B1', 'Date')
-    worksheet.write('C1', 'filename')
-    worksheet.write('D1', 'CyclomaticComplexity')
-    worksheet.write('E1', 'ExcessiveClassLength')
-    worksheet.write('F1', 'ExcessiveMethodLength')
-    worksheet.write('G1', 'ExcessiveParameterList')
-    worksheet.write('H1', 'NPathComplexity')
-    worksheet.write('I1', 'CouplingBetweenObjects')
-    worksheet.write('J1', 'EmptyCatchBlock')
-    worksheet.write('K1', 'DepthOfInheritance')
-    worksheet.write('L1', 'GotoStatement')
-    workbook.close()
+    # worksheet.write('A1', 'Commit id')
+    # worksheet.write('B1', 'Date')
+    # worksheet.write('C1', 'filename')
+    # worksheet.write('D1', 'CyclomaticComplexity')
+    # worksheet.write('E1', 'ExcessiveClassLength')
+    # worksheet.write('F1', 'ExcessiveMethodLength')
+    # worksheet.write('G1', 'ExcessiveParameterList')
+    # worksheet.write('H1', 'NPathComplexity')
+    # worksheet.write('I1', 'CouplingBetweenObjects')
+    # worksheet.write('J1', 'EmptyCatchBlock')
+    # worksheet.write('K1', 'DepthOfInheritance')
+    # worksheet.write('L1', 'GotoStatement')
+    # workbook.close()
+
+    csvfile = open("D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName  + ".csv", 'w', newline='')
+
+    with csvfile:
+
+        writer = csv.writer(csvfile, delimiter='|')
+
+        writer.writerow(('Commit id', 'Date', 'filename',
+                        'CyclomaticComplexity', 'ExcessiveClassLength',
+                        'ExcessiveMethodLength', 'ExcessiveParameterList', 'NPathComplexity', 'CouplingBetweenObjects',
+                        'EmptyCatchBlock', 'DepthOfInheritance', 'GotoStatement'))
+    csvfile.close()
 else:
     row = json_file['row']
     start_commit = json_file['commit']
@@ -75,12 +89,12 @@ f.close()
 def smell_cmd(commit, row, commit_date):
     try:
 
-        # wb = load_workbook(filename="D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".xlsx")
-        # workbook = wb.active
-        wbkName = "D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".xlsx"
-        wbk = openpyxl.load_workbook(wbkName)
-        # print(wbk.worksheets[0])
-        wks = wbk.worksheets[0]
+        # # wb = load_workbook(filename="D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".xlsx")
+        # # workbook = wb.active
+        # wbkName = "D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".xlsx"
+        # wbk = openpyxl.load_workbook(wbkName)
+        # # print(wbk.worksheets[0])
+        # wks = wbk.worksheets[0]
 
 
         out = subprocess.check_output("phpmd " + pathDirectory + " json D:/Projects/AnalysteProject/myRuleset.xml ", shell=True)
@@ -89,6 +103,8 @@ def smell_cmd(commit, row, commit_date):
 
     result_dict = json.loads(out)
     # print(result_dict)
+
+    date_time = commit_date.strftime("%m/%d/%Y, %H:%M:%S")
 
     copy_files = Files.copy()
     # print('Files:', len(result_dict['files']))
@@ -135,25 +151,20 @@ def smell_cmd(commit, row, commit_date):
 
         # print('CodeSmells Complexite', CyclomaticComplexity)
 
-        date_time = commit_date.strftime("%m/%d/%Y, %H:%M:%S")
 
-        # write operation perform
 
-        wks.cell(row=row, column=1).value = commit
-        wks.cell(row=row, column=2).value =date_time
-        wks.cell(row=row, column=3).value = file['file']
-        wks.cell(row=row, column=4).value = CyclomaticComplexity
-        wks.cell(row=row, column=5).value = ExcessiveClassLength
-        wks.cell(row=row, column=6).value = ExcessiveMethodLength
-        wks.cell(row=row, column=7).value = ExcessiveParameterList
-        wks.cell(row=row, column=8).value = NPathComplexity
-        wks.cell(row=row, column=9).value = CouplingBetweenObjects
-        wks.cell(row=row, column=10).value = EmptyCatchBlock
-        wks.cell(row=row, column=11).value = DepthOfInheritance
-        wks.cell(row=row, column=12).value = GotoStatement
 
-        wbk.save(wbkName)
+        csvfile1 = open("D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + 'csv', 'a', newline='')
 
+        with csvfile1:
+
+            writer = csv.writer(csvfile1, delimiter=',')
+
+            writer.writerow((commit, date_time, file['file'],
+                             CyclomaticComplexity, ExcessiveClassLength,
+                             ExcessiveMethodLength, ExcessiveParameterList, NPathComplexity, CouplingBetweenObjects,
+                             EmptyCatchBlock, DepthOfInheritance, GotoStatement))
+        csvfile1.close()
 
         # worksheet.write_row(row, 0, commit)
         # worksheet.write(row, 0, commit)
@@ -174,36 +185,13 @@ def smell_cmd(commit, row, commit_date):
         row += 1
 
     for elemet_file in copy_files:
-        # worksheet.write(row, 0, commit)
-        # worksheet.write(row, 1, date_time)
-        # worksheet.write(row, 2, elemet_file)
-        # worksheet.write(row, 3, 0)
-        # worksheet.write(row, 4, 0)
-        # worksheet.write(row, 5, 0)
-        # worksheet.write(row, 6, 0)
-        # worksheet.write(row, 7, 0)
-        # worksheet.write(row, 8, 0)
-        # worksheet.write(row, 9, 0)
-        # worksheet.write(row, 10, 0)
-        # worksheet.write(row, 11, 0)
-        print(elemet_file)
-        wks.cell(row=row, column=1).value = commit
-        wks.cell(row=row, column=2).value =date_time
-        wks.cell(row=row, column=3).value = elemet_file
-        wks.cell(row=row, column=4).value = 0
-        wks.cell(row=row, column=5).value = 0
-        wks.cell(row=row, column=6).value = 0
-        wks.cell(row=row, column=7).value = 0
-        wks.cell(row=row, column=8).value = 0
-        wks.cell(row=row, column=9).value = 0
-        wks.cell(row=row, column=10).value = 0
-        wks.cell(row=row, column=11).value = 0
-        wks.cell(row=row, column=12).value = 0
-
         row += 1
+        csvfile1 = open("D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + 'csv', 'a', newline='')
 
-        wbk.save(wbkName)
-    wbk.close
+        with csvfile1:
+            writer = csv.writer(csvfile1, delimiter=',')
+            writer.writerow((commit, date_time, elemet_file, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+        csvfile1.close()
 
     return row
 
@@ -220,21 +208,24 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit).traverse
     count += 1
     print("Commit :", count)
 
-    cmd_Checkout = "git checkout " + commit.hash
+    cmd_Checkout = "git checkout " + commit.hash + " -f"
     # print(cmd_Checkout)
+    # print('CLEAN')
+    # os.system("git reset --hard")
+    print('Checkout !!!!!')
     subprocess.check_output(cmd_Checkout, shell=True)
     # os.system(cmd_Checkout)
     print("start")
 
     json_file = {
-        'name': "D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".xlsx",
+        'name': "D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".csv",
         'row': row,
         'commit': commit.hash,
-        'first_commit': "f9903ed0a41ce4df0cb3628a06d6c0a9455ac75c",
+        'first_commit': "a188d62105532fcf2a2839309fb71b862d904612",
         'files': Files
     }
 
-    with open('D:/Projects/AnalysteProject/config.json', 'w') as gg:
+    with open('D:/Projects/AnalysteProject/config_' + ApplicationName +'.json', 'w') as gg:
         # print(json_file)
         gg.seek(0)
         json.dump(json_file, gg)
@@ -242,25 +233,25 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit).traverse
     row = smell_cmd(commit.hash, row, commit.committer_date)
 
     json_file = {
-        'name': "D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".xlsx",
+        'name': "D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".csv",
         'row': row,
         'commit': commit.hash,
-        'first_commit': "f9903ed0a41ce4df0cb3628a06d6c0a9455ac75c",
+        'first_commit': "a188d62105532fcf2a2839309fb71b862d904612",
         'files': Files
     }
-    with open('D:/Projects/AnalysteProject/config.json', 'w') as gg:
+    with open('D:/Projects/AnalysteProject/config_' + ApplicationName + '.json', 'w') as gg:
         print(json_file)
         gg.seek(0)
         json.dump(json_file, gg)
 
-    f = open('D:/Projects/AnalysteProject/config.json')
+    f = open('D:/Projects/AnalysteProject/config_' + ApplicationName +'.json')
     json_file = json.load(f)
     # print(json_file)
     f.close()
 
 print("Closed")
 
-f = open('D:/Projects/AnalysteProject/config.json')
+f = open('D:/Projects/AnalysteProject/config_' + ApplicationName +'.json')
 json_file = json.load(f)
 print(json_file["row"])
 f.close()
