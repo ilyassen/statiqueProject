@@ -67,7 +67,7 @@ if not json_file['name']:
 
     with csvfile:
 
-        writer = csv.writer(csvfile, delimiter='|')
+        writer = csv.writer(csvfile, delimiter=',')
 
         writer.writerow(('Commit id', 'Date', 'filename',
                         'CyclomaticComplexity', 'ExcessiveClassLength',
