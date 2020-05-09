@@ -2,60 +2,68 @@
 from pydriller import RepositoryMining
 import subprocess
 
-import re
 import json
 import os
 
 import csv
-
-import xlsxwriter
-
-from openpyxl import Workbook
-from openpyxl.utils import get_column_letter
-from openpyxl import load_workbook
-import openpyxl
-
 import shutil
 
-ApplicationName = "phpunit"
+import subprocess
+import shutil
+import os
+import stat
+from os import path
+import patoolib
 
-pathDirectory = "D:/Projects/AnalysteProject/repositories/" + ApplicationName
+from pyunpack import Archive
 
-os.chdir("D:/Projects/AnalysteProject/repositories")
+
+ApplicationName = "laravel"
+pathFolder = "D:/Projects/AnalysteProject"
+pathRepositories = pathFolder + "/repositories"
+pathDirectory = pathRepositories + '/' + ApplicationName
+
+os.chdir(pathRepositories)
 
 
 Projet_GIT_URL = "https://github.com/laravel/laravel"
 
 # subprocess.check_output("git clone " + Projet_GIT_URL , shell=True)
 
-os.chdir("D:/Projects/AnalysteProject")
 
-f = open('D:/Projects/AnalysteProject/config_' + ApplicationName +'.json')
+# REMOVE REPO
+try:
+    for root, dirs, files in os.walk(pathDirectory):
+        for dir in dirs:
+            os.chmod(path.join(root, dir), stat.S_IRWXU)
+        for file in files:
+            os.chmod(path.join(root, file), stat.S_IRWXU)
+    shutil.rmtree(pathDirectory)
+    # END REMOVE REPO
+except:
+    print("An exception occurred")
+
+
+# patoolib.extract_archive("foo_bar.rar", outdir="path here")
+
+Archive(pathRepositories + '/' + ApplicationName + '.rar').extractall(pathRepositories)
+
+os.chdir(pathFolder)
+
+
+
+f = open(pathFolder + '/config_' + ApplicationName +'.json')
+
 json_file = json.load(f)
 print(json_file)
+
 if not json_file['name']:
-    # workbook = xlsxwriter.Workbook("D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".xlsx")
-    # worksheet = workbook.add_worksheet("Analyse")
-    # wsn = worksheet.name
-    # print(worksheet.name)
+
     row = 2
     Files = []
     start_commit = json_file['first_commit']
-    # worksheet.write('A1', 'Commit id')
-    # worksheet.write('B1', 'Date')
-    # worksheet.write('C1', 'filename')
-    # worksheet.write('D1', 'CyclomaticComplexity')
-    # worksheet.write('E1', 'ExcessiveClassLength')
-    # worksheet.write('F1', 'ExcessiveMethodLength')
-    # worksheet.write('G1', 'ExcessiveParameterList')
-    # worksheet.write('H1', 'NPathComplexity')
-    # worksheet.write('I1', 'CouplingBetweenObjects')
-    # worksheet.write('J1', 'EmptyCatchBlock')
-    # worksheet.write('K1', 'DepthOfInheritance')
-    # worksheet.write('L1', 'GotoStatement')
-    # workbook.close()
-
-    csvfile = open("D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName  + ".csv", 'w', newline='')
+    numberCommit = 0
+    csvfile = open(pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName  + ".csv", 'w', newline='')
 
     with csvfile:
 
@@ -70,16 +78,9 @@ else:
     row = json_file['row']
     start_commit = json_file['commit']
     Files = json_file['files']
-
+    numberCommit = json_file['numberCommit']
 
 f.close()
-# json_file['config'] = {'name': "D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".xlsx",
-#                        'row': 1,
-#                        'commit': '0'}
-
-# Use the worksheet object to write
-# data via the write() method.
-
 
 
 
@@ -89,15 +90,7 @@ f.close()
 def smell_cmd(commit, row, commit_date):
     try:
 
-        # # wb = load_workbook(filename="D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".xlsx")
-        # # workbook = wb.active
-        # wbkName = "D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".xlsx"
-        # wbk = openpyxl.load_workbook(wbkName)
-        # # print(wbk.worksheets[0])
-        # wks = wbk.worksheets[0]
-
-
-        out = subprocess.check_output("phpmd " + pathDirectory + " json D:/Projects/AnalysteProject/myRuleset.xml ", shell=True)
+        out = subprocess.check_output("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml ", shell=True)
     except subprocess.CalledProcessError as e:
         out = e.output
 
@@ -112,11 +105,9 @@ def smell_cmd(commit, row, commit_date):
 
         if file['file'] not in Files:
             Files.append(file['file'])
-            for elem in Files:
-                print(elem)
         else:
             copy_files.remove(file['file'])
-            print(copy_files)
+
 
         NPathComplexity = 0
         CyclomaticComplexity = 0
@@ -149,12 +140,7 @@ def smell_cmd(commit, row, commit_date):
             if violation['rule'] == 'GotoStatement':
                 GotoStatement = GotoStatement + 1
 
-        # print('CodeSmells Complexite', CyclomaticComplexity)
-
-
-
-
-        csvfile1 = open("D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + 'csv', 'a', newline='')
+        csvfile1 = open(pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName + '.csv', 'a', newline='')
 
         with csvfile1:
 
@@ -166,45 +152,30 @@ def smell_cmd(commit, row, commit_date):
                              EmptyCatchBlock, DepthOfInheritance, GotoStatement))
         csvfile1.close()
 
-        # worksheet.write_row(row, 0, commit)
-        # worksheet.write(row, 0, commit)
-        # worksheet.write(row, 1, date_time)
-        # worksheet.write(row, 2, file['file'])
-        # worksheet.write(row, 3, CyclomaticComplexity)
-        # worksheet.write(row, 4, ExcessiveClassLength)
-        # worksheet.write(row, 5, ExcessiveMethodLength)
-        # worksheet.write(row, 6, ExcessiveParameterList)
-        # worksheet.write(row, 7, NPathComplexity)
-        # worksheet.write(row, 8, CouplingBetweenObjects)
-        # worksheet.write(row, 9, EmptyCatchBlock)
-        # worksheet.write(row, 10, DepthOfInheritance)
-        # worksheet.write(row, 11, GotoStatement)
 
-        # incrementing the value of row by one
-        # with each iteratons.
         row += 1
 
     for elemet_file in copy_files:
         row += 1
-        csvfile1 = open("D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + 'csv', 'a', newline='')
+        csvfile1 = open(pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName + '.csv', 'a', newline='')
 
         with csvfile1:
             writer = csv.writer(csvfile1, delimiter=',')
             writer.writerow((commit, date_time, elemet_file, 0, 0, 0, 0, 0, 0, 0, 0, 0))
         csvfile1.close()
 
+    print(Files)
+    print(copy_files)
+
     return row
-
-
-
-
 
 
 count = 0
 
 
 os.chdir(pathDirectory)
-for commit in RepositoryMining(pathDirectory, from_commit=start_commit).traverse_commits():
+for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_branch="master",
+                               only_modifications_with_file_types=['.php']).traverse_commits():
     count += 1
     print("Commit :", count)
 
@@ -212,46 +183,47 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit).traverse
     # print(cmd_Checkout)
     # print('CLEAN')
     # os.system("git reset --hard")
-    print('Checkout !!!!!')
     subprocess.check_output(cmd_Checkout, shell=True)
     # os.system(cmd_Checkout)
     print("start")
 
     json_file = {
-        'name': "D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".csv",
+        'name': pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName + ".csv",
         'row': row,
         'commit': commit.hash,
         'first_commit': "a188d62105532fcf2a2839309fb71b862d904612",
-        'files': Files
+        'files': Files,
+        'numberCommit': numberCommit
     }
 
-    with open('D:/Projects/AnalysteProject/config_' + ApplicationName +'.json', 'w') as gg:
+    with open(pathFolder + '/config_' + ApplicationName +'.json', 'w') as gg:
         # print(json_file)
         gg.seek(0)
         json.dump(json_file, gg)
 
     row = smell_cmd(commit.hash, row, commit.committer_date)
-
+    numberCommit += 1
     json_file = {
-        'name': "D:/Projects/AnalysteProject/" + ApplicationName + "/Analyse_" + ApplicationName + ".csv",
+        'name': pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName + ".csv",
         'row': row,
         'commit': commit.hash,
         'first_commit': "a188d62105532fcf2a2839309fb71b862d904612",
-        'files': Files
+        'files': Files,
+        'numberCommit': numberCommit
     }
-    with open('D:/Projects/AnalysteProject/config_' + ApplicationName + '.json', 'w') as gg:
+    with open(pathFolder + '/config_' + ApplicationName + '.json', 'w') as gg:
         print(json_file)
         gg.seek(0)
         json.dump(json_file, gg)
 
-    f = open('D:/Projects/AnalysteProject/config_' + ApplicationName +'.json')
+    f = open(pathFolder + '/config_' + ApplicationName +'.json')
     json_file = json.load(f)
     # print(json_file)
     f.close()
 
 print("Closed")
 
-f = open('D:/Projects/AnalysteProject/config_' + ApplicationName +'.json')
+f = open(pathFolder + '/config_' + ApplicationName +'.json')
 json_file = json.load(f)
 print(json_file["row"])
 f.close()
