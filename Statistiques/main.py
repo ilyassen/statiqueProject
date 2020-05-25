@@ -1,17 +1,31 @@
 import json
 import csv
+import subprocess
+import os
 
 ApplicationName = "laravel"
 
 list_files = {}
 
-with open('D:/Projects/AnalysteProject/laravel/analyse_' + ApplicationName + '_modified.csv') as csv_file:
+pathFolder = "C:/Project/statiqueProject/" + ApplicationName
+pathRepositories = pathFolder + "/repositories"
+pathGitRepo = "C:/Project/statiqueProject/repositories/" + ApplicationName
+
+def get_number_commits(commitId):
+    cmd_checkout = "git checkout " + commitId + " -f"
+    subprocess.check_output(cmd_checkout, shell=True)
+    return int(subprocess.check_output("git rev-list --count HEAD", shell=True))
+
+
+os.chdir(pathGitRepo)
+
+with open(pathFolder + '/analyse_' + ApplicationName + '.csv') as csv_file:
     csv_reader = csv.DictReader(csv_file)
     line_count = 0
     for row in csv_reader:
-        commitId = row["commit"]
-        date = row["date"]
-        filePath = row["filePath"]
+        commitId = row["Commit id"]
+        date = row["Date"]
+        filePath = row["filename"]
         CyclomaticComplexity = int(row["CyclomaticComplexity"])
         ExcessiveClassLength= int(row["ExcessiveClassLength"])
         ExcessiveMethodLength = int(row["ExcessiveMethodLength"])
@@ -40,6 +54,7 @@ with open('D:/Projects/AnalysteProject/laravel/analyse_' + ApplicationName + '_m
 
             list_files[filePath].append([commitId, date, CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength,\
             ExcessiveParameterList, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement])
+            print(get_number_commits(commitId))
 
         # print(list_files[filePath][-1])
         # print(CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength,\
@@ -49,15 +64,18 @@ with open('D:/Projects/AnalysteProject/laravel/analyse_' + ApplicationName + '_m
 
 # print(json.dumps(list_files, indent = 4))
 
-csvfile1 = open("D:/Projects/AnalysteProject/" + ApplicationName + "/Statistique_Analyse_" + ApplicationName + '.csv', 'a', newline='')
+csvfile1 = open(pathFolder + "/Statistique_Analyse_" + ApplicationName + '.csv', 'a', newline='')
 
 with csvfile1:
 
     writer = csv.writer(csvfile1, delimiter=',')
     writer.writerow(('commitID','Date','filePath','CyclomaticComplexity','ExcessiveClassLength','ExcessiveMethodLength',\
-            'ExcessiveParameterList', 'NPathComplexity', 'CouplingBetweenObjects', 'EmptyCatchBlock', 'DepthOfInheritance', 'GotoStatement'))
+            'ExcessiveParameterList', 'NPathComplexity', 'CouplingBetweenObjects', 'EmptyCatchBlock', 'DepthOfInheritance', 'GotoStatement', 'Commit number'))
     for path in list_files:
         for element in list_files[path]:
             # print(path,element[0],element[1])
-            writer.writerow((path, element[0], element[1], element[2], element[3], element[4], element[5], element[6], element[7], element[8], element[9], element[10]))
+            writer.writerow((element[0], element[1], element[2], path, element[3], element[4], element[5], element[6], element[7], element[8], element[9], element[10], get_number_commits(commitId)))
 csvfile1.close()
+
+
+
