@@ -18,7 +18,7 @@ import patoolib
 from pyunpack import Archive
 
 
-ApplicationName = "phpunit"
+ApplicationName = "laravel"
 pathFolder = "C:\Project\statiqueProject"
 pathRepositories = pathFolder + "/repositories"
 pathDirectory = pathRepositories + '/' + ApplicationName
@@ -98,8 +98,9 @@ f.close()
 def smell_cmd(commit, row, commit_date):
     try:
         # phpmd C:\Project\statiqueProject\myRuleset.xml text C:\Project\statiqueProject\myRuleset.xml
-        out = subprocess.check_output("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml ", shell=True)
-
+        # out = subprocess.check_output("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml ", shell=True)
+        # out = subprocess.run(['phpmd', pathDirectory, 'json', 'C:/Project/statiqueProject/myRuleset.xml'], stdout=subprocess.PIPE)
+        out = subprocess.getoutput("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml ")
         result_dict = json.loads(out)
         # print(result_dict)
 
@@ -108,12 +109,13 @@ def smell_cmd(commit, row, commit_date):
         copy_files = Files.copy()
         # print('Files:', len(result_dict['files']))
 
-        for file in result_dict['files'].split("\\\\", 5)[-1:][0]:
-
-            if file['file'] not in Files:
-                Files.append(file['file'])
+        for file in result_dict['files']:
+            filename = '/'.join(file['file'].rsplit('\\', 2)[-2:])
+            print(filename)
+            if filename not in Files:
+                Files.append(filename)
             else:
-                copy_files.remove(file['file'])
+                copy_files.remove(filename)
 
 
             NPathComplexity = 0
@@ -153,7 +155,7 @@ def smell_cmd(commit, row, commit_date):
 
                 writer = csv.writer(csvfile1, delimiter=',')
 
-                writer.writerow((commit, date_time, file['file'],
+                writer.writerow((commit, date_time, filename,
                                  CyclomaticComplexity, ExcessiveClassLength,
                                  ExcessiveMethodLength, ExcessiveParameterList, NPathComplexity, CouplingBetweenObjects,
                                  EmptyCatchBlock, DepthOfInheritance, GotoStatement))
@@ -172,7 +174,7 @@ def smell_cmd(commit, row, commit_date):
             csvfile1.close()
     except subprocess.CalledProcessError as e:
         print(e.output)
-        print("out")
+        print("out ERROR")
 
 
 
@@ -187,7 +189,7 @@ count = 0
 
 
 os.chdir(pathDirectory)
-for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_branch="master", only_releases=True,
+for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_branch="master",
                                only_modifications_with_file_types=[".php"])\
                                     .traverse_commits():
     count += 1
