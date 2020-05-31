@@ -15,7 +15,42 @@ import stat
 from os import path
 import patoolib
 
+from dataBase import db
+
 from pyunpack import Archive
+
+
+
+def commit_files(commit):
+    dictFiles = {"modifiedFiles": [],
+                 "addedFiles": [],
+                 "removedFiles": []
+                 }
+
+    for m in commit.modifications:
+        # if m.change_type.name != 'DELETE':
+        #     print(m.change_type.name)
+
+        filename, file_extension = os.path.splitext(m.filename)
+        if file_extension == '.php':
+            if m.change_type.name == "RENAME":
+                dictFiles['modifiedFiles'].append({
+                    'old_path': m.old_path,
+                    'new_path': m.new_path
+                })
+            elif m.change_type.name == "ADD" or "MODIFY":
+                dictFiles['addedFiles'] = {
+                    'new_path': m.new_path
+                }
+            elif m.change_type.name == "DELETE":
+                dictFiles['removedFiles'] = {
+                    'old_path': m.old_path
+                }
+        # elif m.change_type.name == "MODIFY":
+        #     print("Modified")
+
+    return dictFiles
+
 
 
 ApplicationName = "laravel"
@@ -64,6 +99,8 @@ if not json_file['name']:
     start_commit = json_file['first_commit']
     numberCommit = 0
     firstCommit = json_file['first_commit']
+    countfile = 0
+    db.reset_table()
     csvfile = open(pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName  + ".csv", 'w', newline='')
 
     with csvfile:
@@ -84,38 +121,55 @@ if not json_file['name']:
 else:
     row = json_file['row']
     start_commit = json_file['commit']
-    Files = json_file['files']
+    Files = db.get_filenames()
     numberCommit = json_file['numberCommit']
     firstCommit = json_file['first_commit']
+    countfile = json_file['countfile']
 
 f.close()
 
 
-
-
+def get_index_simalirity():
+    cmd = "git diff [<options>] <commit> [--] [<path>…​]"
+    out = subprocess.getoutput("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml ")
 
 
 def smell_cmd(commit, row, commit_date):
+    global countfile
     try:
-        # phpmd C:\Project\statiqueProject\myRuleset.xml text C:\Project\statiqueProject\myRuleset.xml
+        # phpmd C:\Project\statiqueProject text C:\Project\statiqueProject\myRuleset.xml
         # out = subprocess.check_output("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml ", shell=True)
         # out = subprocess.run(['phpmd', pathDirectory, 'json', 'C:/Project/statiqueProject/myRuleset.xml'], stdout=subprocess.PIPE)
-        out = subprocess.getoutput("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml ")
+        out = subprocess.getoutput("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml --ignore-violations-on-exi")
+        print(out)
         result_dict = json.loads(out)
-        # print(result_dict)
+
 
         date_time = commit_date.strftime("%m/%d/%Y, %H:%M:%S")
 
-        copy_files = Files.copy()
+        removed_files = db.get_filenames()
         # print('Files:', len(result_dict['files']))
 
+        dict_commit_files = commit_files(commit)
+        db_files = db.get_filepaths()
+
         for file in result_dict['files']:
-            filename = '/'.join(file['file'].rsplit('\\', 2)[-2:])
-            print(filename)
-            if filename not in Files:
+            # filename = '/'.join(file['file'].rsplit('\\', 2)[-2:])
+            filename = file['file'].replace('C:\\Project\\statiqueProject\\Repositories\\' + ApplicationName + '\\', '')
+
+            for element_dict in dict_commit_files['modifiedFiles']:
+                if element_dict['old_path'] == filename:
+                    db.modify_line(filename, element_dict['old_path'])
+
+            if filename not in db_files:
+                countfile += 1
+                # New file or changed path.
+                db.add_line("file_ " + str(countfile), filename)
                 Files.append(filename)
             else:
-                copy_files.remove(filename)
+                element_remove = db.get_filename(filename)
+                removed_files.remove(element_remove)
+
 
 
             NPathComplexity = 0
@@ -155,7 +209,7 @@ def smell_cmd(commit, row, commit_date):
 
                 writer = csv.writer(csvfile1, delimiter=',')
 
-                writer.writerow((commit, date_time, filename,
+                writer.writerow((commit.hash, date_time, db.get_filenames(filename),
                                  CyclomaticComplexity, ExcessiveClassLength,
                                  ExcessiveMethodLength, ExcessiveParameterList, NPathComplexity, CouplingBetweenObjects,
                                  EmptyCatchBlock, DepthOfInheritance, GotoStatement))
@@ -164,13 +218,13 @@ def smell_cmd(commit, row, commit_date):
 
             row += 1
 
-        for elemet_file in copy_files:
+        for elemet_file in removed_files:
             row += 1
             csvfile1 = open(pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName + '.csv', 'a', newline='')
 
             with csvfile1:
                 writer = csv.writer(csvfile1, delimiter=',')
-                writer.writerow((commit, date_time, elemet_file, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+                writer.writerow((commit.hash, date_time, elemet_file, 0, 0, 0, 0, 0, 0, 0, 0, 0))
             csvfile1.close()
     except subprocess.CalledProcessError as e:
         print(e.output)
@@ -189,11 +243,16 @@ count = 0
 
 
 os.chdir(pathDirectory)
+print("Commit start : ", start_commit)
 for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_branch="master",
                                only_modifications_with_file_types=[".php"])\
                                     .traverse_commits():
+
+    # print(commit_files(commit))
+
     count += 1
     print("Commit :", count)
+    print("HASH : ", commit.hash)
 
     if numberCommit == 0:
         firstCommit = commit.hash
@@ -212,7 +271,8 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_
         'commit': commit.hash,
         'first_commit': firstCommit,
         'files': Files,
-        'numberCommit': numberCommit
+        'numberCommit': numberCommit,
+        'countfile': countfile
     }
 
     with open(pathFolder + '/config_' + ApplicationName +'.json', 'w') as gg:
@@ -220,7 +280,7 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_
         gg.seek(0)
         json.dump(json_file, gg)
 
-    row = smell_cmd(commit.hash, row, commit.committer_date)
+    row = smell_cmd(commit, row, commit.committer_date)
     numberCommit += 1
     json_file = {
         'name': pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName + ".csv",
@@ -228,7 +288,8 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_
         'commit': commit.hash,
         'first_commit': firstCommit,
         'files': Files,
-        'numberCommit': numberCommit
+        'numberCommit': numberCommit,
+        'countfile': countfile
     }
     with open(pathFolder + '/config_' + ApplicationName + '.json', 'w') as gg:
         print(json_file)
