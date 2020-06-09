@@ -33,6 +33,8 @@ def commit_files(commit):
         #     print(m.change_type.name)
 
         filename, file_extension = os.path.splitext(m.filename)
+
+        file_paths = db.get_filepaths()
         if file_extension == '.php':
             if m.change_type.name == "RENAME":
                 dictFiles['modifiedFiles'].append({
@@ -40,22 +42,24 @@ def commit_files(commit):
                     'new_path': m.new_path
                 })
                 dictFiles['files'].append(m.new_path)
+            elif m.change_type.name == "DELETE":
+                if m.old_path in file_paths:
+                    dictFiles['removedFiles'].append({
+                        'old_path': m.old_path
+                    })
             elif m.change_type.name == "ADD" or "MODIFY":
                 dictFiles['addedFiles'].append({
                     'new_path': m.new_path
                 })
                 dictFiles['files'].append(m.new_path)
-            elif m.change_type.name == "DELETE":
-                dictFiles['removedFiles'].append({
-                    'old_path': m.old_path
-                })
+
         # elif m.change_type.name == "MODIFY":
         #     print("Modified")
 
     return dictFiles
 
 
-ApplicationName = "WordPress"
+ApplicationName = "wordpress"
 pathFolder = "C:/Project/statiqueProject"
 pathRepositories = pathFolder + "/repositories"
 pathDirectory = pathRepositories + '/' + ApplicationName
@@ -134,6 +138,9 @@ if not json_file['name']:
 
         writer.writerow(('commitID', 'Date'))
     commitFile.close()
+
+
+
 else:
     row = json_file['row']
     start_commit = json_file['commit']
@@ -249,7 +256,7 @@ def smell_cmd(commit, row, commit_date):
 
             with csvfile1:
                 writer = csv.writer(csvfile1, delimiter=',')
-                writer.writerow((commit.hash, date_time, element_file.old_path, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+                writer.writerow((commit.hash, date_time, db.get_filename(element_file['old_path']), 0, 0, 0, 0, 0, 0, 0, 0, 0))
             csvfile1.close()
 
         for element_file in removed_files:
@@ -290,10 +297,10 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_
     print("Commit :", numberCommit)
     print("HASH : ", commit.hash)
 
-    if numberCommit == 0:
-        firstCommit = commit.hash
+
 
     cmd_Checkout = "git checkout " + commit.hash + " -f"
+
 
 
     # print(cmd_Checkout)
@@ -302,8 +309,8 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_
     subprocess.check_output(cmd_Checkout, shell=True)
     # os.system(cmd_Checkout)
 
-
-
+    if numberCommit == 0:
+        firstCommit = commit.hash
 
     print("start")
 
@@ -322,7 +329,8 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_
         gg.seek(0)
         json.dump(json_file, gg)
 
-    row = smell_cmd(commit, row, commit.committer_date)
+        row = smell_cmd(commit, row, commit.committer_date)
+
     numberCommit += 1
     json_file = {
         'name': pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName + ".csv",
