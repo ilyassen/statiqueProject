@@ -24,7 +24,8 @@ from pyunpack import Archive
 def commit_files(commit):
     dictFiles = {"modifiedFiles": [],
                  "addedFiles": [],
-                 "removedFiles": []
+                 "removedFiles": [],
+                 "files": []
                  }
 
     for m in commit.modifications:
@@ -38,10 +39,12 @@ def commit_files(commit):
                     'old_path': m.old_path,
                     'new_path': m.new_path
                 })
+                dictFiles['files'].append(m.new_path)
             elif m.change_type.name == "ADD" or "MODIFY":
-                dictFiles['addedFiles'] = {
+                dictFiles['addedFiles'].append({
                     'new_path': m.new_path
-                }
+                })
+                dictFiles['files'].append(m.new_path)
             elif m.change_type.name == "DELETE":
                 dictFiles['removedFiles'] = {
                     'old_path': m.old_path
@@ -52,15 +55,22 @@ def commit_files(commit):
     return dictFiles
 
 
-
-ApplicationName = "laravel"
-pathFolder = "C:\Project\statiqueProject"
+ApplicationName = "WordPress"
+pathFolder = "C:/Project/statiqueProject"
 pathRepositories = pathFolder + "/repositories"
 pathDirectory = pathRepositories + '/' + ApplicationName
 
 os.chdir(pathRepositories)
 
 
+def cmd_files(commit):
+    result = {"files": []}
+    for file in commit_files(commit)['files']:
+        out = subprocess.getoutput("phpmd " + pathDirectory + '/' + file + " json " + pathFolder + "/myRuleset.xml --ignore-violations-on-exi")
+        result_dict = json.loads(out)
+        for element in result_dict['files']:
+            result['files'].append(element)
+    print(result)
 Projet_GIT_URL = "https://github.com/laravel/laravel"
 
 # subprocess.check_output("git clone " + Projet_GIT_URL , shell=True)
@@ -136,99 +146,106 @@ def get_index_simalirity():
 
 def smell_cmd(commit, row, commit_date):
     global countfile
+
     try:
+        dict_commit_files = commit_files(commit)
         # phpmd C:\Project\statiqueProject text C:\Project\statiqueProject\myRuleset.xml
         # out = subprocess.check_output("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml ", shell=True)
         # out = subprocess.run(['phpmd', pathDirectory, 'json', 'C:/Project/statiqueProject/myRuleset.xml'], stdout=subprocess.PIPE)
+        print(dict_commit_files['files'])
         out = subprocess.getoutput("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml --ignore-violations-on-exi")
-        print(out)
-        result_dict = json.loads(out)
+        # print(out)
+        try:
+            result_dict = json.loads(out)
 
 
-        date_time = commit_date.strftime("%m/%d/%Y, %H:%M:%S")
+            date_time = commit_date.strftime("%m/%d/%Y, %H:%M:%S")
 
-        removed_files = db.get_filenames()
-        # print('Files:', len(result_dict['files']))
+            removed_files = db.get_filenames()
+            # print('Files:', len(result_dict['files']))
 
-        dict_commit_files = commit_files(commit)
-        db_files = db.get_filepaths()
+            db_files = db.get_filepaths()
 
-        for file in result_dict['files']:
-            # filename = '/'.join(file['file'].rsplit('\\', 2)[-2:])
-            filename = file['file'].replace('C:\\Project\\statiqueProject\\Repositories\\' + ApplicationName + '\\', '')
+            for file in result_dict['files']:
+                # filename = '/'.join(file['file'].rsplit('\\', 2)[-2:])
+                filename = file['file'].replace('C:\\Project\\statiqueProject\\Repositories\\' + ApplicationName + '\\', '')
 
-            for element_dict in dict_commit_files['modifiedFiles']:
-                if element_dict['old_path'] == filename:
-                    db.modify_line(filename, element_dict['old_path'])
-
-            if filename not in db_files:
-                countfile += 1
-                # New file or changed path.
-                db.add_line("file_ " + str(countfile), filename)
-                Files.append(filename)
-            else:
-                element_remove = db.get_filename(filename)
-                removed_files.remove(element_remove)
-
+                for element_dict in dict_commit_files['modifiedFiles']:
+                    if element_dict['old_path'] == filename:
+                        db.modify_line(filename, element_dict['o_path'])
+                db_files = db.get_filepaths()
+                if filename not in db_files:
+                    countfile += 1
+                    # New file or changed path.
+                    db.add_line("file_ " + str(countfile), filename)
+                    Files.append(filename)
+                else:
+                    element_remove = db.get_filename(filename)
+                    removed_files.remove(element_remove)
 
 
-            NPathComplexity = 0
-            CyclomaticComplexity = 0
-            ExcessiveClassLength = 0
-            ExcessiveMethodLength =0
-            ExcessiveParameterList = 0
-            CouplingBetweenObjects = 0
-            EmptyCatchBlock = 0
-            DepthOfInheritance = 0
-            GotoStatement = 0
 
-            for violation in file['violations']:
+                NPathComplexity = 0
+                CyclomaticComplexity = 0
+                ExcessiveClassLength = 0
+                ExcessiveMethodLength =0
+                ExcessiveParameterList = 0
+                CouplingBetweenObjects = 0
+                EmptyCatchBlock = 0
+                DepthOfInheritance = 0
+                GotoStatement = 0
 
-                if violation['rule'] == 'CyclomaticComplexity':
-                    CyclomaticComplexity = CyclomaticComplexity + 1
-                if violation['rule'] == 'NPathComplexity':
-                    NPathComplexity = NPathComplexity + 1
-                if violation['rule'] == 'ExcessiveClassLength':
-                    ExcessiveClassLength = ExcessiveClassLength + 1
-                if violation['rule'] == 'ExcessiveMethodLength':
-                    ExcessiveMethodLength = ExcessiveMethodLength + 1
-                if violation['rule'] == 'ExcessiveParameterList':
-                    ExcessiveParameterList = ExcessiveParameterList + 1
-                if violation['rule'] == 'CouplingBetweenObjects':
-                    CouplingBetweenObjects = CouplingBetweenObjects + 1
-                if violation['rule'] == 'EmptyCatchBlock':
-                    EmptyCatchBlock = EmptyCatchBlock + 1
-                if violation['rule'] == 'DepthOfInheritance':
-                    DepthOfInheritance = DepthOfInheritance + 1
-                if violation['rule'] == 'GotoStatement':
-                    GotoStatement = GotoStatement + 1
+                for violation in file['violations']:
 
-            csvfile1 = open(pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName + '.csv', 'a', newline='')
+                    if violation['rule'] == 'CyclomaticComplexity':
+                        CyclomaticComplexity = CyclomaticComplexity + 1
+                    if violation['rule'] == 'NPathComplexity':
+                        NPathComplexity = NPathComplexity + 1
+                    if violation['rule'] == 'ExcessiveClassLength':
+                        ExcessiveClassLength = ExcessiveClassLength + 1
+                    if violation['rule'] == 'ExcessiveMethodLength':
+                        ExcessiveMethodLength = ExcessiveMethodLength + 1
+                    if violation['rule'] == 'ExcessiveParameterList':
+                        ExcessiveParameterList = ExcessiveParameterList + 1
+                    if violation['rule'] == 'CouplingBetweenObjects':
+                        CouplingBetweenObjects = CouplingBetweenObjects + 1
+                    if violation['rule'] == 'EmptyCatchBlock':
+                        EmptyCatchBlock = EmptyCatchBlock + 1
+                    if violation['rule'] == 'DepthOfInheritance':
+                        DepthOfInheritance = DepthOfInheritance + 1
+                    if violation['rule'] == 'GotoStatement':
+                        GotoStatement = GotoStatement + 1
 
-            with csvfile1:
+                csvfile1 = open(pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName + '.csv', 'a', newline='')
 
-                writer = csv.writer(csvfile1, delimiter=',')
+                with csvfile1:
 
-                writer.writerow((commit.hash, date_time, db.get_filenames(filename),
-                                 CyclomaticComplexity, ExcessiveClassLength,
-                                 ExcessiveMethodLength, ExcessiveParameterList, NPathComplexity, CouplingBetweenObjects,
-                                 EmptyCatchBlock, DepthOfInheritance, GotoStatement))
-            csvfile1.close()
+                    writer = csv.writer(csvfile1, delimiter=',')
+
+                    writer.writerow((commit.hash, date_time, db.get_filename(filename),
+                                     CyclomaticComplexity, ExcessiveClassLength,
+                                     ExcessiveMethodLength, ExcessiveParameterList, NPathComplexity, CouplingBetweenObjects,
+                                     EmptyCatchBlock, DepthOfInheritance, GotoStatement))
+                csvfile1.close()
 
 
-            row += 1
+                row += 1
 
-        for elemet_file in removed_files:
-            row += 1
-            csvfile1 = open(pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName + '.csv', 'a', newline='')
+            for elemet_file in removed_files:
+                row += 1
+                csvfile1 = open(pathFolder + "/" + ApplicationName + "/Analyse_" + ApplicationName + '.csv', 'a', newline='')
 
-            with csvfile1:
-                writer = csv.writer(csvfile1, delimiter=',')
-                writer.writerow((commit.hash, date_time, elemet_file, 0, 0, 0, 0, 0, 0, 0, 0, 0))
-            csvfile1.close()
+                with csvfile1:
+                    writer = csv.writer(csvfile1, delimiter=',')
+                    writer.writerow((commit.hash, date_time, elemet_file, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+                csvfile1.close()
+        except:
+            print("error")
+            return 0
     except subprocess.CalledProcessError as e:
         print(e.output)
         print("out ERROR")
+        return 0
 
 
 
@@ -250,19 +267,26 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_
 
     # print(commit_files(commit))
 
+
     count += 1
-    print("Commit :", count)
+    print("Commit :", numberCommit)
     print("HASH : ", commit.hash)
 
     if numberCommit == 0:
         firstCommit = commit.hash
 
     cmd_Checkout = "git checkout " + commit.hash + " -f"
+
+
     # print(cmd_Checkout)
     # print('CLEAN')
     # os.system("git reset --hard")
     subprocess.check_output(cmd_Checkout, shell=True)
     # os.system(cmd_Checkout)
+
+    cmd_files(commit)
+
+
     print("start")
 
     json_file = {
