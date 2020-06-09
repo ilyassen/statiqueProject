@@ -3,4 +3,8 @@ AnalysteProject.iml
 /classes
 .idea
 demo
-repositories
+Repositories
+WordPress
+laravel
+phpunit
+/venv/
