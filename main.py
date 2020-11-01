@@ -59,7 +59,7 @@ def commit_files(commit):
     return dictFiles
 
 
-ApplicationName = "wordpress"
+ApplicationName = "moodle"
 pathFolder = "C:/Project/statiqueProject"
 pathRepositories = pathFolder + "/repositories"
 pathDirectory = pathRepositories + '/' + ApplicationName
@@ -75,11 +75,15 @@ def cmd_files(commit):
 
 
     for file in dict:
-        out = subprocess.getoutput("phpmd " + pathDirectory + '/' + file + " json " + pathFolder + "/myRuleset.xml --ignore-violations-on-exi")
-        result_dict = json.loads(out)
-        for element in result_dict['files']:
-            result['files'].append(element)
-            result['not_smell'].remove(element['file'].replace('C:\\Project\\statiqueProject\\Repositories\\' + ApplicationName + '\\', ''))
+        try:
+            out = subprocess.getoutput("phpmd " + pathDirectory + '/' + file + " json " + pathFolder + "/myRuleset.xml --ignore-violations-on-exi")
+            result_dict = json.loads(out)
+            for element in result_dict['files']:
+                result['files'].append(element)
+                result['not_smell'].remove(element['file'].replace('C:\\Project\\statiqueProject\\Repositories\\' + ApplicationName + '\\', ''))
+        except:
+            print('Error')
+        
     return result
 Projet_GIT_URL = "https://github.com/laravel/laravel"
 
@@ -152,9 +156,9 @@ else:
 f.close()
 
 
-def get_index_simalirity():
-    cmd = "git diff [<options>] <commit> [--] [<path>…​]"
-    out = subprocess.getoutput("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml ")
+# def get_index_simalirity():
+#     cmd = "git diff [<options>] <commit> [--] [<path>…​]"
+#     out = subprocess.getoutput("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml ")
 
 
 def smell_cmd(commit, row, commit_date):
@@ -329,7 +333,7 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_
         gg.seek(0)
         json.dump(json_file, gg)
 
-        row = smell_cmd(commit, row, commit.committer_date)
+    row = smell_cmd(commit, row, commit.committer_date)
 
     numberCommit += 1
     json_file = {

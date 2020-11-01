@@ -3,7 +3,7 @@ import csv
 import subprocess
 import os
 
-ApplicationName = "laravel"
+ApplicationName = "phpunit"
 
 list_files = {}
 
@@ -51,9 +51,13 @@ with open(pathFolder + '/analyse_' + ApplicationName + '.csv') as csv_file:
                 list_files[filePath][-1][6] != NPathComplexity or list_files[filePath][-1][7] != CouplingBetweenObjects or\
                 list_files[filePath][-1][8] != EmptyCatchBlock or list_files[filePath][-1][9] != DepthOfInheritance or\
                 list_files[filePath][-1][10] != GotoStatement:
-
-            list_files[filePath].append([commitId, date, CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength,\
-            ExcessiveParameterList, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement])
+            if list_files[filePath][-1][2] != CyclomaticComplexity*2 or  list_files[filePath][-1][3] != ExcessiveClassLength*2 or \
+                    list_files[filePath][-1][4] != ExcessiveMethodLength*2 or list_files[filePath][-1][5] != ExcessiveParameterList*2 or \
+                    list_files[filePath][-1][6] != NPathComplexity*2 or list_files[filePath][-1][7] != CouplingBetweenObjects*2 or \
+                    list_files[filePath][-1][8] != EmptyCatchBlock*2 or list_files[filePath][-1][9] != DepthOfInheritance*2 or \
+                    list_files[filePath][-1][10] != GotoStatement*2:
+                list_files[filePath].append([commitId, date, CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength,\
+                ExcessiveParameterList, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement])
             print(get_number_commits(commitId))
 
         # print(list_files[filePath][-1])
@@ -74,7 +78,7 @@ with csvfile1:
     for path in list_files:
         for element in list_files[path]:
             # print(path,element[0],element[1])
-            writer.writerow((element[0], element[1], element[2], path, element[3], element[4], element[5], element[6], element[7], element[8], element[9], element[10], get_number_commits(commitId)))
+            writer.writerow((element[0], element[1], path, element[2], element[3], element[4], element[5], element[6], element[7], element[8], element[9], element[10], get_number_commits(element[0])))
 csvfile1.close()
 
 

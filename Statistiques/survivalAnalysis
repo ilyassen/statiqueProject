@@ -1,0 +1,92 @@
+import json
+import csv
+import subprocess
+import os
+
+import matplotlib.pyplot as plt
+
+ApplicationName = "phpunit"
+
+list_files = {}
+
+pathFolder = "C:/Project/statiqueProject/" + ApplicationName
+pathRepositories = pathFolder + "/repositories"
+pathGitRepo = "C:/Project/statiqueProject/repositories/" + ApplicationName
+
+
+
+
+
+
+os.chdir(pathGitRepo)
+
+CyclomaticComplexityList = []
+ExcessiveClassLengthList = []
+ExcessiveMethodLengthList = []
+ExcessiveParameterList = []
+NPathComplexityList = []
+CouplingBetweenObjectsList = []
+EmptyCatchBlockList = []
+DepthOfInheritanceList = []
+GotoStatementList = []
+
+with open(pathFolder + '/analyse_' + ApplicationName + '.csv') as csv_file:
+    csv_reader = csv.DictReader(csv_file)
+    line_count = 0
+    count_commit = 0
+    last_commit = ""
+    for row in csv_reader:
+        commitId = row["Commit id"]
+        date = row["Date"]
+        filePath = row["filename"]
+        CyclomaticComplexity = int(row["CyclomaticComplexity"])
+        ExcessiveClassLength= int(row["ExcessiveClassLength"])
+        ExcessiveMethodLength = int(row["ExcessiveMethodLength"])
+        ExcessiveParameter = int(row["ExcessiveParameterList"])
+        NPathComplexity = int(row["NPathComplexity"])
+        CouplingBetweenObjects = int(row["CouplingBetweenObjects"])
+        EmptyCatchBlock = int(row["EmptyCatchBlock"])
+        DepthOfInheritance = int(row["DepthOfInheritance"])
+        GotoStatement = int(row["GotoStatement"])
+
+
+
+
+
+        if filePath not in list_files.keys():
+            list_files[filePath] = [[commitId, date, CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength, \
+                                     ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement]]
+
+        list_files[filePath].append([commitId, date, CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength, \
+                                     ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement])
+
+
+        print(line_count)
+
+
+
+
+csvfile1 = open(pathFolder + "/Survival/Survival_Statistique_Analyse_" + ApplicationName + '.csv', 'a', newline='')
+
+with csvfile1:
+
+    writer = csv.writer(csvfile1, delimiter=',')
+    writer.writerow(('commitID','Date','filePath','CyclomaticComplexity','ExcessiveClassLength','ExcessiveMethodLength', \
+                     'ExcessiveParameter', 'NPathComplexity', 'CouplingBetweenObjects', 'EmptyCatchBlock', 'DepthOfInheritance', 'GotoStatement', 'Commit number'))
+    count_commit = 0
+    last_commit = ""
+
+    for path in list_files:
+        count_commit = 0
+        for element in list_files[path]:
+            # print(path,element[0],element[1])
+            line_count += 1
+            count_commit += 1
+
+
+            writer.writerow((element[0], element[1], path, element[2], element[3], element[4], element[5], element[6], element[7], element[8], element[9], element[10], count_commit))
+csvfile1.close()
+
+
+
+
