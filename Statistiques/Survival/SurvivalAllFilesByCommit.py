@@ -58,7 +58,7 @@ for project in list_projects:
                                          ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement, Commit_number])
 
 
-csvfile1 = open("C:/Project/statiqueProject/Results/R3/Results_All_Dates.csv", 'a', newline='')
+csvfile1 = open("C:\Project\statiqueProject/Results/R3/Results_All_Commits.csv", 'a', newline='')
 
 with csvfile1:
     writer = csv.writer(csvfile1, delimiter=',')
@@ -75,22 +75,22 @@ with csvfile1:
 
                     if cc < int(element[(2 + element_range_smell)]):
                         while cc < int(element[2 + element_range_smell]):
-                            list_cc.append({"date": element[1], "cc": int(element[2 + element_range_smell]), "file": filePath})
+                            list_cc.append({"commit": element[11], "cc": int(element[2 + element_range_smell]), "file": filePath})
                             cc += 1
-                    elif cc > int(element[2]):
-                        while cc > int(element[2]):
+                    elif cc > int(element[2 + element_range_smell]):
+                        while cc > int(element[2 + element_range_smell]):
                             fe = list_cc.pop(0)
                             print("File:" + element_file)
-                            print(element[1] - fe['date'])
-                            writer.writerow((abs((element[1] - fe['date']).days), 1, 1 + element_range_smell))
+                            print(element[11] - fe['commit'])
+                            writer.writerow((abs((element[11] - fe['commit'])), 1, 1 + element_range_smell))
                             cc -= 1
 
                     elif lenght == cpt:
                         while list_cc:
                             fe = list_cc.pop(0)
                             print("File:" + element_file)
-                            print(abs(element[1] - fe['date']))
-                            writer.writerow((abs((element[1] - fe['date']).days), 0, 1 + element_range_smell))
+                            print(abs(element[11] - fe['commit']))
+                            writer.writerow((abs((element[11] - fe['commit'])), 0, 1 + element_range_smell))
                             cc -= 1
                     cpt += 1
 

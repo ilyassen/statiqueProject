@@ -1,0 +1,6 @@
+Projet,CyclomaticComplexity,ExcessiveClassLength,ExcessiveMethodLength,ExcessiveParameterList,NPathComplexity,CouplingBetweenObjects,EmptyCatchBlock,DepthOfInheritance,GotoStatement
+Wordpress,1319,59,630,7,938,5,0,0,0
+phpunit,183,27,72,16,106,63,23,0,0
+moodle,4500,314,1902,89,2620,405,88,0,0
+matomo,594,30,207,46,367,152,95,0,0
+laravel,21,5,4,0,15,5,2,0,0

@@ -1,0 +1,37 @@
+Project name,Smell,Created,Deleted,,,,,,,
+moodley,0,10699,6260,,,,,,,
+moodley,1,606,328,,,,TOTAL,Smells Created,Smells Deleted,%
+moodley,2,4102,2465,,,,CyclomaticComplexity,13257,8004,60.3756506
+moodley,3,222,93,,,,ExcessiveClassLength,1043,700,67.11409396
+moodley,4,5651,2874,,,,ExcessiveMethodLength,5073,3165,62.38911886
+moodley,5,614,324,,,,ExcessiveParameter,386,205,53.10880829
+moodley,6,299,206,,,,NPathComplexity,7103,3800,53.49852175
+moodley,7,1,1,,,,CouplingBetweenObjects,1554,1106,71.17117117
+moodley,8,0,0,,,,EmptyCatchBlock,710,547,77.04225352
+matomo,0,2045,1445,,,,DepthOfInheritance,1,1,100
+matomo,1,130,100,,,,GotoStatement,0,0,0
+matomo,2,689,503,,,,,,,
+matomo,3,144,101,,,,,,,
+matomo,4,1224,838,,,,,,,
+matomo,5,302,195,,,,,,,
+matomo,6,218,180,,,,,,,
+matomo,7,0,0,,,,,,,
+matomo,8,0,0,,,,,,,
+phpunit,0,472,279,,,,,,,
+phpunit,1,88,58,,,,,,,
+phpunit,2,197,116,,,,,,,
+phpunit,3,20,11,,,,,,,
+phpunit,4,199,74,,,,,,,
+phpunit,5,175,127,,,,,,,
+phpunit,6,75,45,,,,,,,
+phpunit,7,0,0,,,,,,,
+phpunit,8,0,0,,,,,,,
+laravel,0,41,20,,,,,,,
+laravel,1,219,214,,,,,,,
+laravel,2,85,81,,,,,,,
+laravel,3,0,0,,,,,,,
+laravel,4,29,14,,,,,,,
+laravel,5,463,460,,,,,,,
+laravel,6,118,116,,,,,,,
+laravel,7,0,0,,,,,,,
+laravel,8,0,0,,,,,,,

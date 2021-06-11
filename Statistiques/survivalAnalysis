@@ -5,7 +5,7 @@ import os
 
 import matplotlib.pyplot as plt
 
-ApplicationName = "phpunit"
+ApplicationName = "matomo"
 
 list_files = {}
 
@@ -30,15 +30,15 @@ EmptyCatchBlockList = []
 DepthOfInheritanceList = []
 GotoStatementList = []
 
-with open(pathFolder + '/analyse_' + ApplicationName + '.csv') as csv_file:
+with open(pathFolder + '/Statistique_Analyse_' + ApplicationName + '.csv') as csv_file:
     csv_reader = csv.DictReader(csv_file)
     line_count = 0
     count_commit = 0
     last_commit = ""
     for row in csv_reader:
-        commitId = row["Commit id"]
+        commitId = row["commitID"]
         date = row["Date"]
-        filePath = row["filename"]
+        filePath = row["filePath"]
         CyclomaticComplexity = int(row["CyclomaticComplexity"])
         ExcessiveClassLength= int(row["ExcessiveClassLength"])
         ExcessiveMethodLength = int(row["ExcessiveMethodLength"])
@@ -48,6 +48,7 @@ with open(pathFolder + '/analyse_' + ApplicationName + '.csv') as csv_file:
         EmptyCatchBlock = int(row["EmptyCatchBlock"])
         DepthOfInheritance = int(row["DepthOfInheritance"])
         GotoStatement = int(row["GotoStatement"])
+        commitNumber = row["Commit number"]
 
 
 
@@ -55,10 +56,10 @@ with open(pathFolder + '/analyse_' + ApplicationName + '.csv') as csv_file:
 
         if filePath not in list_files.keys():
             list_files[filePath] = [[commitId, date, CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength, \
-                                     ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement]]
-
-        list_files[filePath].append([commitId, date, CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength, \
-                                     ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement])
+                                     ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement, commitNumber]]
+        else :
+            list_files[filePath].append([commitId, date, CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength, \
+                                     ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement, commitNumber])
 
 
         print(line_count)
@@ -66,7 +67,7 @@ with open(pathFolder + '/analyse_' + ApplicationName + '.csv') as csv_file:
 
 
 
-csvfile1 = open(pathFolder + "/Survival/Survival_Statistique_Analyse_" + ApplicationName + '.csv', 'a', newline='')
+csvfile1 = open(pathFolder + "/Survival_Statistique_Analyse_" + ApplicationName + '.csv', 'a', newline='')
 
 with csvfile1:
 
@@ -84,7 +85,7 @@ with csvfile1:
             count_commit += 1
 
 
-            writer.writerow((element[0], element[1], path, element[2], element[3], element[4], element[5], element[6], element[7], element[8], element[9], element[10], count_commit))
+            writer.writerow((element[0], element[1], path, element[2], element[3], element[4], element[5], element[6], element[7], element[8], element[9], element[10], element[11]))
 csvfile1.close()
 
 

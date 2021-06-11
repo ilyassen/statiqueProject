@@ -6,11 +6,11 @@ import os
 from datetime import datetime
 import matplotlib.pyplot as plt
 
-ApplicationName = "wordpress"
+
 
 list_files = {}
 
-list_projects = ["laravel", "wordpress", "matomo", "phpunit", "moodle"]
+list_projects = ["moodle", "laravel", "wordpress", "matomo", "phpunit"]
 
 
 
@@ -18,7 +18,7 @@ list_projects = ["laravel", "wordpress", "matomo", "phpunit", "moodle"]
 
 for project in list_projects:
 
-    pathFolder = "C:/Project/statiqueProject/" + project
+    pathFolder = "C:/Project/statiqueProject/Results/R31"
     list_files[project]= {}
     CyclomaticComplexityList = []
     ExcessiveClassLengthList = []
@@ -29,14 +29,14 @@ for project in list_projects:
     EmptyCatchBlockList = []
     DepthOfInheritanceList = []
     GotoStatementList = []
-    with open(pathFolder + '/Survival/Cleaned_Survival_Statistique_Analyse_' + project + '.csv') as csv_file:
+    with open(pathFolder + '/CleanedStatistique_Analyse_' + project + '.csv') as csv_file:
 
         csv_reader = csv.DictReader(csv_file)
         line_count = 0
         count_commit = 0
         last_commit = ""
         for row in csv_reader:
-            commitId = row["Commit id"]
+            commitId = row["commit Id"]
             date = row["Date"]
             filePath = row["filename"]
             CyclomaticComplexity = int(row["CyclomaticComplexity"])
@@ -48,7 +48,7 @@ for project in list_projects:
             EmptyCatchBlock = int(row["EmptyCatchBlock"])
             DepthOfInheritance = int(row["DepthOfInheritance"])
             GotoStatement = int(row["GotoStatement"])
-            Commit_number = int(row["Commit number"])
+            Commit_number = int(row["Effective Commit"])
 
             if filePath not in list_files[project].keys():
                 list_files[project][filePath] = [[commitId, datetime.strptime(date.replace(',', ''), '%m/%d/%Y %H:%M:%S'), CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength, \
@@ -58,7 +58,7 @@ for project in list_projects:
                                          ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement, Commit_number])
 
 
-csvfile1 = open("C:\Project\statiqueProject/Results/R3/Results_All_Commits.csv", 'a', newline='')
+csvfile1 = open(pathFolder + "/Results_All_Effective_Commits.csv", 'a', newline='')
 
 with csvfile1:
     writer = csv.writer(csvfile1, delimiter=',')
@@ -77,8 +77,8 @@ with csvfile1:
                         while cc < int(element[2 + element_range_smell]):
                             list_cc.append({"commit": element[11], "cc": int(element[2 + element_range_smell]), "file": filePath})
                             cc += 1
-                    elif cc > int(element[2]):
-                        while cc > int(element[2]):
+                    elif cc > int(element[2 + element_range_smell]):
+                        while cc > int(element[2 + element_range_smell]):
                             fe = list_cc.pop(0)
                             print("File:" + element_file)
                             print(element[11] - fe['commit'])

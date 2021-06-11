@@ -15,7 +15,7 @@ pathRepositories = pathFolder + "/repositories"
 pathGitRepo = "C:/Project/statiqueProject/repositories/" + ApplicationName
 
 
-Projects = ["phpunit", "laravel", "matomo"]
+Projects = ["moodley","matomo","phpunit","laravel"]
 
 
 

@@ -5,7 +5,7 @@ import os
 
 import matplotlib.pyplot as plt
 
-ApplicationName = "phpunit"
+ApplicationName = "moodley"
 
 list_files = {}
 

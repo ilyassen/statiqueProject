@@ -3,7 +3,7 @@ import csv
 import subprocess
 import os
 
-ApplicationName = "moodley"
+ApplicationName = "moodle"
 
 list_files = {}
 
@@ -16,9 +16,12 @@ pathGitRepo = "C:/Project/statiqueProject/repositories/" + ApplicationName
 def get_number_commits(commitId):
     commit_number = 0
     cmd_checkout = "git checkout " + commitId + " -f"
-    subprocess.check_output(cmd_checkout, shell=True)
     try:
-        commit_number = int(subprocess.check_output("git rev-list HEAD --count --first-parent", shell=True))
+        subprocess.check_output(cmd_checkout, shell=True)
+        try:
+            commit_number = int(subprocess.check_output("git rev-list HEAD --count --first-parent", shell=True))
+        except:
+            print("An exception occurred")
     except:
         print("An exception occurred")
     return commit_number
@@ -90,13 +93,7 @@ with csvfile1:
     for path in list_files:
 
         for element in list_files[path]:
-            # print("Result : " + commitId)
-            if element[0] not in list_commits:
-                list_commits[element[0]] = get_number_commits(element[0])
-            else:
-                print(list_commits[element[0]])
-            # print(path,element[0],element[1])
-            writer.writerow((element[0], element[1], path, element[2], element[3], element[4], element[5], element[6], element[7], element[8], element[9], element[10], list_commits[element[0]] ))
+            writer.writerow((element[0], element[1], path, element[2], element[3], element[4], element[5], element[6], element[7], element[8], element[9], element[10]))
 csvfile1.close()
 
 

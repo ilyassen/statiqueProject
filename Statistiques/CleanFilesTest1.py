@@ -3,6 +3,10 @@ import csv
 import subprocess
 import os
 
+
+
+list_projects = ["laravel", "wordpress", "matomo", "phpunit", "moodle"]
+
 ApplicationName = "moodle"
 
 list_files = {}
@@ -17,7 +21,7 @@ pathGitRepo = "C:/Project/statiqueProject/repositories/" + ApplicationName
 
 os.chdir(pathGitRepo)
 
-with open(pathFolder + "/Survival/Survival_Statistique_Analyse_" + ApplicationName + '.csv') as csv_file:
+with open(pathFolder + "/CleanedStatistique_Analyse_" + ApplicationName + '.csv') as csv_file:
     csv_reader = csv.DictReader(csv_file)
     line_count = False
     ListFiles = []
@@ -25,6 +29,8 @@ with open(pathFolder + "/Survival/Survival_Statistique_Analyse_" + ApplicationNa
     LastfilePath = ""
     filePath = ""
     for row in csv_reader:
+        # If not the first itteration and not the last file and line not smelly
+        # (It means not smelly and last row for a file)
         if(line_count and row["filePath"] != LastfilePath and
                 LastCyclomaticComplexity + LastExcessiveClassLength + LastExcessiveMethodLength +
                 LastExcessiveParameter + LastNPathComplexity + LastCouplingBetweenObjects +
@@ -51,10 +57,11 @@ with open(pathFolder + "/Survival/Survival_Statistique_Analyse_" + ApplicationNa
         commitId = row["commitID"]
         date = row["Date"]
         filePath = row["filePath"]
+        print(filePath)
         CyclomaticComplexity = int(row["CyclomaticComplexity"])
         ExcessiveClassLength= int(row["ExcessiveClassLength"])
         ExcessiveMethodLength = int(row["ExcessiveMethodLength"])
-        ExcessiveParameter = int(row["ExcessiveParameter"])
+        ExcessiveParameter = int(row["ExcessiveParameterList"])
         NPathComplexity = int(row["NPathComplexity"])
         CouplingBetweenObjects = int(row["CouplingBetweenObjects"])
         EmptyCatchBlock = int(row["EmptyCatchBlock"])
@@ -62,8 +69,6 @@ with open(pathFolder + "/Survival/Survival_Statistique_Analyse_" + ApplicationNa
         GotoStatement = int(row["GotoStatement"])
         Commit_number = int(row["Commit number"])
 
-        if (filePath == "file_ 96"):
-            print("hello")
 
         # if(zero_flag):
         #     if (CyclomaticComplexity == BLastCyclomaticComplexity and
@@ -114,13 +119,19 @@ with open(pathFolder + "/Survival/Survival_Statistique_Analyse_" + ApplicationNa
                         CouplingBetweenObjects == BLastCouplingBetweenObjects and
                         EmptyCatchBlock == BLastEmptyCatchBlock and
                         DepthOfInheritance == BLastDepthOfInheritance and
-                        GotoStatement == BLastGotoStatement ):
-                    ListFiles.append([commitId, date, filePath, CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength,
-                                                 ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement,Commit_number])
+                        GotoStatement == BLastGotoStatement ) and \
+                        (CyclomaticComplexity + ExcessiveClassLength  + ExcessiveMethodLength + ExcessiveParameter +
+                         NPathComplexity + CouplingBetweenObjects +  EmptyCatchBlock + DepthOfInheritance +
+                         GotoStatement != 1 ):
+                    # ListFiles.append([commitId, date, filePath, CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength,
+                    #                              ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement,Commit_number])
+                    print("")
                 else:
+
                     ListFiles.append([LastcommitId, LastDate, LastfilePath, LastCyclomaticComplexity, LastExcessiveClassLength,
                                       LastExcessiveMethodLength, LastExcessiveParameter, LastNPathComplexity, LastCouplingBetweenObjects,
                                       LastEmptyCatchBlock, LastDepthOfInheritance, LastGotoStatement, LastCommit_number])
+
                     ListFiles.append([commitId, date, filePath, CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength,
                                       ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement,Commit_number])
 

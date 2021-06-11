@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 import matplotlib.pyplot as plt
 
-ApplicationName = "phpunit"
+ApplicationName = "wordpress"
 
 list_files = {}
 
@@ -63,7 +63,7 @@ with open(pathFolder + '/Survival/Cleaned_Survival_Statistique_Analyse_' + Appli
                                      ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement, Commit_number])
 
 
-csvfile1 = open(pathFolder + "/Survival/Timeline_Analysis_" + ApplicationName + '_test.csv', 'a', newline='')
+csvfile1 = open(pathFolder + "/Survival/Timeline_Analysis_" + ApplicationName + '.csv', 'a', newline='')
 
 with csvfile1:
 
@@ -87,15 +87,15 @@ with csvfile1:
                         fe = list_cc.pop(0)
                         print("File:" + element_file)
                         print(element[1] - fe['date'])
-                        writer.writerow(((element[1] - fe['date']).days, 1, 1 + element_range_smell, element_file))
+                        writer.writerow((abs((element[1] - fe['date']).days), 1, 1 + element_range_smell))
                         cc -= 1
 
                 elif lenght == cpt:
                     while list_cc:
                         fe = list_cc.pop(0)
                         print("File:" + element_file)
-                        print(element[1] - fe['date'])
-                        writer.writerow(((element[1] - fe['date']).days, 0, 1 + element_range_smell, element_file))
+                        print(abs(element[1] - fe['date']))
+                        writer.writerow((abs((element[1] - fe['date']).days), 0, 1 + element_range_smell))
                         cc -= 1
                 cpt += 1
 

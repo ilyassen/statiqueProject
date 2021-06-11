@@ -3,8 +3,14 @@ AnalysteProject.iml
 /classes
 .idea
 demo
-Repositories
-WordPress
-laravel
-phpunit
+/Repositories/
+WordPress/
+/laravel/
+/phpunit
 /venv/
+/matomo/
+/moodle/
+/Boxplot
+/moodley/
+/New folder/
+/phpunit/

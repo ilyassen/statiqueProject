@@ -6,14 +6,14 @@ import json
 import os
 
 import csv
-import shutil
+
 
 import subprocess
 import shutil
 import os
 import stat
 from os import path
-import patoolib
+
 
 from dataBase import db
 
@@ -28,7 +28,7 @@ def commit_files(commit):
                  "files": []
                  }
 
-    for m in commit.modifications:
+    for commit_file in commit.modifications:
         # if m.change_type.name != 'DELETE':
         #     print(m.change_type.name)
 
@@ -36,14 +36,14 @@ def commit_files(commit):
 
         file_paths = db.get_filepaths()
         if file_extension == '.php':
-            if m.change_type.name == "RENAME":
+            if commit_file.change_type.name == "RENAME":
                 dictFiles['modifiedFiles'].append({
-                    'old_path': m.old_path,
-                    'new_path': m.new_path
+                    'old_path': commit_file.old_path,
+                    'new_path': commit_file.new_path
                 })
-                dictFiles['files'].append(m.new_path)
-            elif m.change_type.name == "DELETE":
-                if m.old_path in file_paths:
+                dictFiles['files'].append(commit_file.new_path)
+            elif commit_file.change_type.name == "DELETE":
+                if commit_file.old_path in file_paths:
                     dictFiles['removedFiles'].append({
                         'old_path': m.old_path
                     })
@@ -87,7 +87,7 @@ def cmd_files(commit):
     return result
 Projet_GIT_URL = "https://github.com/laravel/laravel"
 
-# subprocess.check_output("git clone " + Projet_GIT_URL , shell=True)
+
 
 
 # REMOVE REPO
@@ -103,7 +103,7 @@ except:
     print("An exception occurred at removing the repo")
 
 
-# patoolib.extract_archive("foo_bar.rar", outdir="path here")
+
 
 Archive(pathRepositories + '/' + ApplicationName + '.zip').extractall(pathRepositories)
 
@@ -114,7 +114,7 @@ os.chdir(pathFolder)
 f = open(pathFolder + '/config_' + ApplicationName +'.json')
 
 json_file = json.load(f)
-# print(json_file)
+
 
 if not json_file['name']:
 
@@ -156,9 +156,6 @@ else:
 f.close()
 
 
-# def get_index_simalirity():
-#     cmd = "git diff [<options>] <commit> [--] [<path>…​]"
-#     out = subprocess.getoutput("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml ")
 
 
 def smell_cmd(commit, row, commit_date):
@@ -166,12 +163,9 @@ def smell_cmd(commit, row, commit_date):
 
     try:
         dict_commit_files = commit_files(commit)
-        # phpmd C:\Project\statiqueProject text C:\Project\statiqueProject\myRuleset.xml
-        # out = subprocess.check_output("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml ", shell=True)
-        # out = subprocess.run(['phpmd', pathDirectory, 'json', 'C:/Project/statiqueProject/myRuleset.xml'], stdout=subprocess.PIPE)
+
         print(dict_commit_files['files'])
-        # out = subprocess.getoutput("phpmd " + pathDirectory + " json " + pathFolder + "/myRuleset.xml --ignore-violations-on-exi")
-        # print(out)
+
 
         # result_dict = json.loads(out)
         result_dict = cmd_files(commit)
@@ -306,12 +300,8 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_
     cmd_Checkout = "git checkout " + commit.hash + " -f"
 
 
-
-    # print(cmd_Checkout)
-    # print('CLEAN')
-    # os.system("git reset --hard")
     subprocess.check_output(cmd_Checkout, shell=True)
-    # os.system(cmd_Checkout)
+
 
     if numberCommit == 0:
         firstCommit = commit.hash
@@ -329,7 +319,7 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_
     }
 
     with open(pathFolder + '/config_' + ApplicationName +'.json', 'w') as gg:
-        # print(json_file)
+
         gg.seek(0)
         json.dump(json_file, gg)
 
@@ -352,7 +342,7 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_
 
     f = open(pathFolder + '/config_' + ApplicationName +'.json')
     json_file = json.load(f)
-    # print(json_file)
+
     f.close()
 
     with open(pathFolder + "/" + ApplicationName + "/commitHistoy_" + ApplicationName  + ".csv", 'a', newline='') as commitFile:
@@ -361,10 +351,7 @@ for commit in RepositoryMining(pathDirectory, from_commit=start_commit, only_in_
 
         writer.writerow((commit.hash, commit.committer_date, commit.in_main_branch, commit.branches, commit.parents))
     commitFile.close()
-    #
-    # cmd_reset_checkout = "git reset --hard HEAD"
-    #
-    # subprocess.check_output(cmd_reset_checkout, shell=True)
+
 
 print("Closed")
 

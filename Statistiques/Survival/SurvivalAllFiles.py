@@ -57,8 +57,7 @@ for project in list_projects:
             list_files[project][filePath].append([commitId, datetime.strptime(date.replace(',', ''), '%m/%d/%Y %H:%M:%S'), CyclomaticComplexity, ExcessiveClassLength, ExcessiveMethodLength, \
                                          ExcessiveParameter, NPathComplexity, CouplingBetweenObjects, EmptyCatchBlock, DepthOfInheritance, GotoStatement, Commit_number])
 
-
-csvfile1 = open("C:/Project/statiqueProject/Results/R3/Results_All_Dates.csv", 'a', newline='')
+csvfile1 = open("C:\Project\statiqueProject/Results/R3/Results_All_Dates.csv", 'a', newline='')
 
 with csvfile1:
     writer = csv.writer(csvfile1, delimiter=',')
@@ -77,8 +76,8 @@ with csvfile1:
                         while cc < int(element[2 + element_range_smell]):
                             list_cc.append({"date": element[1], "cc": int(element[2 + element_range_smell]), "file": filePath})
                             cc += 1
-                    elif cc > int(element[2]):
-                        while cc > int(element[2]):
+                    elif cc > int(element[2 + element_range_smell]):
+                        while cc > int(element[2 + element_range_smell]):
                             fe = list_cc.pop(0)
                             print("File:" + element_file)
                             print(element[1] - fe['date'])
