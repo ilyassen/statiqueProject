@@ -15,7 +15,7 @@ pathRepositories = pathFolder + "/repositories"
 pathGitRepo = "C:/Project/statiqueProject/repositories/" + ApplicationName
 
 
-Projects = ["moodley","matomo","phpunit","laravel"]
+Projects = ["moodle","matomo","phpunit","laravel","wordpress"]
 
 
 
@@ -33,7 +33,7 @@ GotoStatementList = []
 
 
 
-csvfile1 = open("C:/Project/statiqueProject/Results/InstancesTables/Instance_Statistique_Analyse_Projetcs.csv", 'a', newline='')
+csvfile1 = open("C:/Project/statiqueProject/Results/InstancesTables/Instance_Statistique_Analyse_Projetcs_test.csv", 'a', newline='')
 
 with csvfile1:
 

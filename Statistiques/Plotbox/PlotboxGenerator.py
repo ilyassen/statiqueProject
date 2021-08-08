@@ -5,7 +5,7 @@ import os
 
 import matplotlib.pyplot as plt
 
-ApplicationName = "moodle"
+ApplicationName = "laravel"
 
 list_files = {}
 

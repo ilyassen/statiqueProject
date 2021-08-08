@@ -1,7 +1,5 @@
 library(survival)
-project = "wordpress"
-
-kaplan <- read.csv("C:/Project/statiqueProject/Results/R3/new/wordpress/Results_Commits.csv", col.names=c("Time","Died","Group"), row.names=NULL)
+kaplan <- read.csv("C:/Project/statiqueProject/Results/R3/test/Results_phpunit_Dates.csv", col.names=c("Time","Died","Group"), row.names=NULL)
 
 km<-survfit(Surv(kaplan$Time, kaplan$Died) ~ as.factor(kaplan$Group))
 
